@@ -45,3 +45,4 @@ With the exception of the last key - "Pages without Recipe" - which contains a l
 
 ## Acknowledgments 
 This package rests on the shoulders of [recipe-scrapers](https://github.com/hhursev/recipe-scrapers) and [ultimate-sitemap-parser](https://github.com/GateNLP/ultimate-sitemap-parser).
+Thanks to [recipe-scrapers](https://github.com/hhursev/recipe-scrapers), this scraper can be used for scraping any website that contains recipe data. The [recipe-scrapers](https://github.com/hhursev/recipe-scrapers) package also offers a massive list of websites with supported scrapers for more accurate schema markup recognition. If the url you want to scrape is not on that list, please help out by reporting this as a feature.
