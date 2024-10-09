@@ -4,6 +4,7 @@ import requests
 from recipe_scrapers import scrape_html, scraper_exists_for
 
 from .page_scraper import PageScraper
+from .get_html import HTMLScraper
 from ._utils import FileHandler, robot_parser, is_valid_url
 
 class Recipe:
@@ -126,7 +127,7 @@ class RecipeScraper:
     def _scrape_recipe_page(self, page_url, last_modified):
         '''Retrieve html of webpage, then use recipe-scrapers.scrape_html module for determining if recipe schema is available, and retrieving it'''
         try:
-            html = requests.get(page_url, headers={"User-Agent": self.user_agent}).content
+            html = HTMLScraper().scrape_page(page_url, self.user_agent)
             scraper = scrape_html(html, page_url, supported_only = self.website_supported)
             scraper.title() #check if recipe schema is available by pulling standard recipe schema field from recipe_scrapers.scrape_html
             recipe_json = scraper.to_json()
