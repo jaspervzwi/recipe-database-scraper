@@ -81,8 +81,10 @@ class RecipeScraper:
     
     def _handle_input_dict(self, input_dict: dict):
         '''Check input_dict for:
-        - Pages without Recipe to exclude in def scrape_to_json
-        - '''
+            - 'Pages without Recipe' key to exclude in def scrape_to_json
+            - Entries in input_dict that are not valid urls
+            - Entries in input_dict that are missing the 'last_modified' key
+        '''
         invalid_urls = []
         if input_dict:
             self.pages_without_recipe = input_dict.pop("Pages without Recipe", [])
@@ -122,6 +124,7 @@ class RecipeScraper:
         return None
     
     def _scrape_recipe_page(self, page_url, last_modified):
+        '''Retrieve html of webpage, then use recipe-scrapers.scrape_html module for determining if recipe schema is available, and retrieving it'''
         try:
             html = requests.get(page_url, headers={"User-Agent": self.user_agent}).content
             scraper = scrape_html(html, page_url, supported_only = self.website_supported)
