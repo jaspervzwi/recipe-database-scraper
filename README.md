@@ -26,8 +26,8 @@ from recipe-database-scraper import scrape_site, extract_domain
 
 url = "https://barefeetinthekitchen.com/"
 user_agent = "Hungry Scraper " + <myname>
-input_file = extract_domain + ".json"
-output_file = extract_domain + "_new.json"
+input_file = extract_domain(url) + ".json"
+output_file = extract_domain(url) + "_new.json"
 
 data = scrape_site(url, user_agent, input_file = input_file, output_file = output_file, batch_size = 100)
 ```
@@ -35,6 +35,9 @@ data = scrape_site(url, user_agent, input_file = input_file, output_file = outpu
 ## Output
 
 `recipe-database-scraper` currently only creates simple json dictionaries.
+
+<br>
+
 Every key is a webpage url scraped from the sitemap, that contains [Recipe Schema Markup](https://schema.org/Recipe)
 With the exception of the last key - "Pages without Recipe" - which contains a list of all urls that do not contain Recipe Schema Markup
 
