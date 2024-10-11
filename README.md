@@ -51,4 +51,4 @@ This package rests on the shoulders of [recipe-scrapers](https://github.com/hhur
 
 <br>
 
-Thanks to [recipe-scrapers](https://github.com/hhursev/recipe-scrapers), this scraper can be used for scraping any website that contains recipe data. The [recipe-scrapers](https://github.com/hhursev/recipe-scrapers) package also offers a massive list of websites with supported scrapers for more accurate schema markup recognition. If the url you want to scrape is not on that list, please help out by reporting this as a feature.
+Thanks to [recipe-scrapers](https://github.com/hhursev/recipe-scrapers), this scraper can be used for scraping any website that contains recipe data. The [recipe-scrapers](https://github.com/hhursev/recipe-scrapers) package also offers a [massive list of websites with supported scrapers](https://github.com/hhursev/recipe-scraper/issues/new) for more accurate schema markup recognition. If the url you want to scrape is not on that list, please help out by suggesting the site name, as well as a recipe link form it in a [New issue on recipe-scrapers](https://github.com/hhursev/recipe-scraper/issues/new)
