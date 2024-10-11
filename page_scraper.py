@@ -10,7 +10,8 @@ class Page:
         self.last_modified = last_modified
     
     def __str__(self):
-        return f"URL: {self.page_url}, Last Modified: {self.last_modified}"
+        last_modified_value = "Unknown" if self.last_modified is None else self.last_modified
+        return f"URL: {self.page_url}, Last Modified: {last_modified_value}"
 
 class Pages:
     def __init__(self):
@@ -51,8 +52,12 @@ class PageScraper:
 
         for p in all_pages:
             page_url = p.url
-            last_modified = p.last_modified
-            last_modified_str = last_modified.isoformat()
+
+            try:
+                last_modified = p.last_modified
+                last_modified_str = last_modified.isoformat()
+            except:
+                last_modified_str = None
 
             page = Page(page_url, last_modified_str)
             self.pages.add(page)

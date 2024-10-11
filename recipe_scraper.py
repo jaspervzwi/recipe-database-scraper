@@ -97,7 +97,6 @@ class RecipeScraper:
                 try:
                     is_valid_url(url)
                     last_modified = input_dict[url]["last_modified"] #check if the url contains a last_modified key, which is required for matching in def _url_in_input_data
-                    datetime.datetime.fromisoformat(last_modified)
                 except Exception as e:
                     print("Input key error: " + url + ": " + str(type(e)) + str(e))
                     invalid_urls.append(url)
