@@ -1,7 +1,8 @@
 import re
 from publicsuffix2 import get_sld, get_tld
 from urllib.parse import urlparse, urlunparse
-import urllib.robotparser
+# import urllib.robotparser
+import robots
 import json
 
 from ._exceptions import InvalidURLException, RobotParserException
@@ -87,14 +88,13 @@ def robot_parser(url: str) -> object:
     """
 
     stripped_domain_url = strip_url_to_homepage(url)
+    robots_file = stripped_domain_url + "robots.txt"
     try:
-        rp = urllib.robotparser.RobotFileParser()
-        rp.set_url(stripped_domain_url)
-        rp.read()
+        parser = robots.RobotsParser.from_uri(robots_file)
     except:
-        raise RobotParserException(f"Cannot find robots.txt file for {url}\nPlease check if {stripped_domain_url}/robots.txt exists")
+        raise RobotParserException(f"Cannot find robots.txt file for {url}\nPlease check if {robots_file} exists")
 
-    return rp
+    return parser
 
 
 class FileHandler():

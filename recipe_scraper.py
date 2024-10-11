@@ -57,10 +57,10 @@ class RecipeScraper:
         self.pages_without_recipe = []
         self.batch_buffer = 0
         try: 
-            self.rp = robot_parser(self.url)
+            self.robot_parser = robot_parser(self.url)
         except Exception:
             print("Cannot find robots.txt ")
-            self.rp = None
+            self.robot_parser = None
 
     def _recipe_scraper_supported(self) -> bool:
         '''Check if website is supported by recipe-scrapers lib. If not, return value '''
@@ -165,7 +165,7 @@ class RecipeScraper:
             status_message = f"{current_time} INFO [{str(scrape_count)}/{str(len_scraped_pages)}]: "
 
             # Proceed if robots.txt allows fetching the url or robots.txt isn't found 
-            if self.rp is None or self.rp.can_fetch(self.user_agent, self.url):
+            if self.robot_parser is None or self.robot_parser.can_fetch(self.user_agent, self.url):
 
                 is_in_pages_without_recipe = p.page_url in self.pages_without_recipe
                 
