@@ -1,5 +1,4 @@
 import datetime
-import requests
 
 from recipe_scrapers import scrape_html, scraper_exists_for
 
