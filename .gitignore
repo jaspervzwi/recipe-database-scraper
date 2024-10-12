@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *.env
 .env/
+dist/
 venv/
+.venv/
 temp/
 *.log
