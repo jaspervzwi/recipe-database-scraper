@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "recipe-database-scraper"
+version = "0.1.0"
+description = "A Python package for gathering recipes from a website in order to build/maintain a database"
+authors = ["jaspervzwi <jasperzwieten@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "recipe_database_scraper"}]
+repository = "https://github.com/jaspervzwi/recipe-database-scraper"
+keywords = ["recipe", "scraper", "web scraping", "recipes", "database"]
+homepage = "https://github.com/jaspervzwi/recipe-database-scraper"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+recipe-scrapers = "^15.2.1"
+ultimate-sitemap-parser = "^0.5"
+requests = "^2.32.3"
+publicsuffix2 = "^2.20191221"
+robotspy = "^0.10.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+flake8 = "^7.1.1"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
