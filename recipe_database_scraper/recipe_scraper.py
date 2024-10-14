@@ -2,7 +2,7 @@ import datetime
 
 from recipe_scrapers import scrape_html, scraper_exists_for
 
-from .page_scraper import SitemapScraper
+from .sitemap_scraper import SitemapScraper
 from .get_html import HTMLScraper
 from ._utils import FileHandler, robot_parser, is_valid_url
 
