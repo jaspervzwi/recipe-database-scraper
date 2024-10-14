@@ -1,7 +1,6 @@
 import re
 from publicsuffix2 import get_sld, get_tld
 from urllib.parse import urlparse, urlunparse
-# import urllib.robotparser
 import robots
 import json
 
