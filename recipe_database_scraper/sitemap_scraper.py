@@ -26,13 +26,14 @@ class Pages:
     def add(self, page: Page):
         self.pages.append(page)
     
-
 class SitemapScraper:
     def __init__(self, homepage):
+        self.pages = Pages()
         self.homepage = homepage
-        
-    def scrape(self):
+
+    def scrape_sitemap(self):
         ''' Retrieve a tree of AbstractSitemap subclass objects that represent the sitemap, including webpages, see https://ultimate-sitemap-parser.readthedocs.io/en/latest/usp.objects.html#module-usp.objects.sitemap '''
+        print(f"Retrieving sitemaps of {self.homepage} in order to fetch all webpages")
         stripped_homepage = strip_url_to_homepage(self.homepage)
         try:
             self.tree = sitemap_tree_for_homepage(stripped_homepage)
@@ -40,15 +41,9 @@ class SitemapScraper:
         except Exception as e:
             raise SitemapScraperException(self.homepage, stripped_homepage, e)
         return self.all_pages
-
-class PageScraper:
-    def __init__(self, homepage):
-        self.pages = Pages()
-        self.homepage = homepage
     
     def scrape_domain(self):
-        print(f"Retrieving sitemaps of {self.homepage} in order to fetch all webpages")
-        all_pages = SitemapScraper(self.homepage).scrape()
+        all_pages = self.scrape_sitemap()
 
         for p in all_pages:
             page_url = p.url

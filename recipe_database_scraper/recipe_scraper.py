@@ -2,7 +2,7 @@ import datetime
 
 from recipe_scrapers import scrape_html, scraper_exists_for
 
-from .page_scraper import PageScraper
+from .page_scraper import SitemapScraper
 from .get_html import HTMLScraper
 from ._utils import FileHandler, robot_parser, is_valid_url
 
@@ -156,7 +156,7 @@ class RecipeScraper:
 
         input_dict = self._handle_input_dict(input_dict)
 
-        scraped_pages = PageScraper(self.url).scrape()
+        scraped_pages = SitemapScraper(self.url).scrape()
         len_scraped_pages = len(scraped_pages)
         print(f"Found {str(len_scraped_pages)} pages")
 
