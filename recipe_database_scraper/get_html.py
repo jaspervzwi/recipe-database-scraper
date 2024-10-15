@@ -74,7 +74,7 @@ class HTMLScraper:
 
     def _get_headers(self):
         return {
-            'User-Agent': self.user_agent,
+            'User-Agent': self.user_agent
         }
 
     def _fetch_with_retry(self, url):

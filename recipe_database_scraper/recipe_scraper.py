@@ -40,8 +40,11 @@ class Recipes:
     def add_recipe(self, page_url, recipe: Recipe):
         self.recipes[page_url] = recipe.recipe_dict
 
-    def add_non_recipe_page(self, page_url):
+    def add_non_recipe_page(self, page_url: str):
         self.pages_without_recipe.append(page_url)
+    
+    def add_non_recipe_page_list(self, page_list: list):
+        self.pages_without_recipe.extend(page_list)
     
     def to_json(self):
         if len(self.pages_without_recipe) > 0:
@@ -156,9 +159,16 @@ class RecipeScraper:
 
         input_dict = self._handle_input_dict(input_dict)
 
-        scraped_pages = SitemapScraper(self.url).scrape()
-        len_scraped_pages = len(scraped_pages)
-        print(f"Found {str(len_scraped_pages)} pages")
+        scraped_pages, filtered_out_urls = SitemapScraper(self.url).scrape()
+
+        len_scraped_pages = len(scraped_pages) 
+        len_filtered_out_urls = len(filtered_out_urls)
+        len_sitemap_pages = len_scraped_pages + len_filtered_out_urls
+        print(f"Found {str(len_sitemap_pages)} pages in sitemap")
+        print(f"Found {str(len_filtered_out_urls)} pages that cannot contain recipes. Continuing with remaining {str(len_scraped_pages)} pages")
+
+        if len_filtered_out_urls > 0:
+            self.recipes.add_non_recipe_page_list(filtered_out_urls)         
 
         for scrape_count, p in enumerate(scraped_pages, start=1):
             current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f')[:-3]
