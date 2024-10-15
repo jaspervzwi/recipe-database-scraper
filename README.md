@@ -38,11 +38,7 @@ data = scrape_site(url, user_agent, input_file = input_file, output_file = outpu
 
 <br>
 
-Every key is a webpage url scraped from the sitemap, that contains [Recipe Schema Markup](https://schema.org/Recipe).
-
-<br>
-
-With the exception of the last key - "Pages without Recipe" - which contains a list of all urls that do not contain Recipe Schema Markup
+Every key is a webpage url scraped from the sitemap, that contains [Recipe Schema Markup](https://schema.org/Recipe). With the exception of the last key - "Pages without Recipe" - which contains a list of all urls that do not contain Recipe Schema Markup
 
 <br>
 
