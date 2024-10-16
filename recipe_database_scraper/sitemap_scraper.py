@@ -118,7 +118,7 @@ class SitemapScraper:
     
     def _scrape_domain(self):
         '''Populate self.pages with Page objects of url & last modified date for filtered pages & populate self.filtered_out_urls list with all other urls'''
-        self.scrape_sitemap()
+        self._scrape_sitemap()
         all_pages = [page for page in self.sitemap_tree.all_pages()]
         all_pages_dedoubled = list(set(all_pages)) # Remove duplicates and reset type to list for list comprehension
 
