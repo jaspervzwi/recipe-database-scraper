@@ -4,8 +4,7 @@ from ._utils import is_valid_url, strip_url_to_homepage
 from ._exceptions import SitemapScraperException
 
 SITEMAP_FILTER_KEYWORDS = {
-    
-    #All variations of advertisement indicators. Short keywords like 'ad' or 'ads' are specified with common adjacent characters in order not to accidently skip relevant sub-sitemaps
+    # All variations of advertisement indicators. Short keywords like 'ad' or 'ads' are specified with common adjacent characters in order not to accidently skip relevant sub-sitemaps
     "ad-sitemap",
     "-ad-",
     "/ad-",
@@ -15,7 +14,7 @@ SITEMAP_FILTER_KEYWORDS = {
     "advertise",
     "adgroup",
 
-    #All variations of sitetags. Short keywords like 'tag' are specified with common adjacent characters in order not to accidently skip relevant sub-sitemaps
+    # All variations of sitetags. Short keywords like 'tag' are specified with common adjacent characters in order not to accidently skip relevant sub-sitemaps
     "/tag-",
     "-tag-",
     "tag-sitemap",
@@ -36,10 +35,10 @@ SITEMAP_FILTER_KEYWORDS = {
 """Sub-sitemap word combinations that commonly do not contain recipe pages"""
 
 URL_FILTER_KEYWORDS = {
-    #all image extensions
+    # All image extensions
     ".png", ".apng", ".jpg", ".jpeg", ".jpe", ".jif", ".jfif", ".svg", ".webp", ".ico", ".cur", ".tif", ".tiff", ".bmp", ".xbm",
 
-    #all video extensions
+    # All video extensions
     ".webm",".mkv", ".flv", ".vob", ".ogv", ".ogg", ".rrc", ".gifv", ".mng", ".mov", ".avi", ".qt", ".wmv", ".yuv", ".rm", ".asf", ".amv", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m4v", ".svi", ".3gp", ".3g2", ".mxf", ".roq", ".nsv", ".flv", ".f4v", ".f4p", ".f4a", ".f4b", ".mod",
     
     ".gif",
@@ -78,7 +77,7 @@ class SitemapScraper:
         self.filtered_out_urls = []
         self.sitemap_tree = None
 
-    def scrape_sitemap(self):
+    def _scrape_sitemap(self):
         ''' Retrieve a tree of AbstractSitemap subclass objects that represent the sitemap, including webpages, see https://ultimate-sitemap-parser.readthedocs.io/en/latest/usp.objects.html#module-usp.objects.sitemap '''
         stripped_homepage = strip_url_to_homepage(self.homepage)
         try:
@@ -87,9 +86,9 @@ class SitemapScraper:
             raise SitemapScraperException(self.homepage, stripped_homepage, e)
     
     
-    def get_filter_urls(self) -> list:
+    def _get_filter_urls(self) -> list:
         '''Return a list of urls filtered from the sitemap pages for specified keywords.'''
-        def filter_out_pages(sitemap):
+        def _filter_out_pages(sitemap):
             """Recursively extract page objects from the sitemap that match unwanted URLs or sitemaps.
             The all_pages() iterator also captures pages of sub-sitemaps. Therefore, loop through the sub-sitemaps and dedouble the urls at the end"""
 
@@ -106,30 +105,30 @@ class SitemapScraper:
             
             # Sitemaps can contain sub_sitemaps. Recursively extract URLs from sub-sitemaps
             for sub_sitemap in getattr(sitemap, 'sub_sitemaps', []):
-                filter_page_urls.extend(filter_out_pages(sub_sitemap))
+                filter_page_urls.extend(_filter_out_pages(sub_sitemap))
             
             return filter_page_urls
 
         # Remove potential duplicate filtered pages
-        urls_dedoubled = set(filter_out_pages(self.sitemap_tree))
+        urls_dedoubled = set(_filter_out_pages(self.sitemap_tree))
         url_list = list(urls_dedoubled)
 
         return url_list
     
     
-    def scrape_domain(self):
+    def _scrape_domain(self):
         '''Populate self.pages with Page objects of url & last modified date for filtered pages & populate self.filtered_out_urls list with all other urls'''
         self.scrape_sitemap()
         all_pages = [page for page in self.sitemap_tree.all_pages()]
         all_pages_dedoubled = list(set(all_pages)) # Remove duplicates and reset type to list for list comprehension
 
-        self.filtered_out_urls = self.get_filter_urls()
+        self.filtered_out_urls = self._get_filter_urls()
         filter_urls_set = set(self.filtered_out_urls) # Convert list of urls to set for faster membership checking
 
         filtered_page_list = [
             Page(
                 p.url, 
-                getattr(p.last_modified, "isoformat", lambda: None)() #Fallback to None in case sitemaps do not capture last modified dates
+                getattr(p.last_modified, "isoformat", lambda: None)() # Fallback to None in case sitemaps do not capture last modified dates
             ) 
             for p in all_pages_dedoubled
             if p.url not in filter_urls_set
@@ -141,7 +140,7 @@ class SitemapScraper:
     def scrape(self) -> tuple[Pages,list]:
         if is_valid_url(self.homepage):
             print(f"Retrieving sitemaps of {self.homepage} in order to fetch all webpages")
-            self.scrape_domain()
+            self._scrape_domain()
 
             return self.pages, self.filtered_out_urls
         else:

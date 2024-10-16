@@ -98,7 +98,7 @@ class RecipeScraper:
             for url in input_dict:
                 try:
                     is_valid_url(url)
-                    last_modified = input_dict[url]["last_modified"] #check if the url contains a last_modified key, which is required for matching in def _url_in_input_data
+                    last_modified = input_dict[url]["last_modified"] # Check if the url contains a last_modified key, which is required for matching in def _url_in_input_data
                 except Exception as e:
                     print("Input key error: " + url + ": " + str(type(e)) + str(e))
                     invalid_urls.append(url)
@@ -130,11 +130,11 @@ class RecipeScraper:
         try:
             html = HTMLScraper().scrape_page(page_url, self.user_agent)
             scraper = scrape_html(html, page_url, supported_only = self.website_supported)
-            scraper.title() #check if recipe schema is available by pulling standard recipe schema field from recipe_scrapers.scrape_html
+            scraper.title() # Check if recipe schema is available by pulling standard recipe schema field from recipe_scrapers.scrape_html
             recipe_json = scraper.to_json()
             recipe_json["last_modified"] = last_modified
             return Recipe(recipe_json)
-        except (TypeError, NotImplementedError): #NoneType found for scraper.title() OR title not present in recipe-scraper object
+        except (TypeError, NotImplementedError): # NoneType found for scraper.title() OR title not present in recipe-scraper object
             print(f"Exception: No Recipe Schema found at {page_url}")
         except Exception as e:
             print(e)
