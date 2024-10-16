@@ -38,10 +38,6 @@ def is_valid_url(url: str) -> bool:
         r'(\.[a-zA-Z0-9]{1,5})?'        # optional file extension like .html, .jpg, etc.
         r'(\?\S*)?'                     # optional query parameters
         r'(#\S*)?$',                    # optional fragment
-        # r'^(https?):\/\/'                         # http, https protocols
-        # r'(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})'        # domain name (example.com, etc.)
-        # r'(:[0-9]{1,5})?'                         # optional port (e.g., :8080)
-        # r'(\/[a-zA-Z0-9._~:/?#\[\]@!$&\'()*+,;=-]*)*$',  # path, query, and fragment
         re.IGNORECASE
     )
 
