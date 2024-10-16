@@ -19,18 +19,29 @@ def is_valid_url(url: str) -> bool:
     try:
         parsed_url = urlparse(url)
     except Exception as ex:
-        raise InvalidURLException("Unable to parse URL {}: {}".format(url, ex))
+        raise InvalidURLException(f"Unable to parse URL {url}: {ex}")
     
-    assert parsed_url.scheme, "Scheme must be set. Please prefix http:// or https://"
-    assert parsed_url.scheme.lower() in ['http', 'https'], "Scheme must be http:// or https://"
-    assert parsed_url.netloc, f"Cannot determine domain name from {url}"
+    if not parsed_url.scheme:
+        raise InvalidURLException("Scheme must be set. Please prefix http:// or https://")
+    
+    if parsed_url.scheme.lower() not in ['http', 'https']:
+        raise InvalidURLException("Scheme must be http:// or https://")
+    
+    if not parsed_url.netloc:
+        raise InvalidURLException(f"Cannot determine domain name from {url}")
     
     regex_url = re.compile(
-        r'^(https?|ftp):\/\/'           # http, https, ftp protocols
+        r'^(https?):\/\/'               # http, https protocols
         r'(\w+(\-\w+)*\.)+[a-z]{2,}'    # domain name (example.com, etc.)
+        r'(:[0-9]{1,5})?'               # optional port (e.g., :8080)
         r'(\/[\w\-]*)*'                 # optional path (e.g. /something)
+        r'(\.[a-zA-Z0-9]{1,5})?'        # optional file extension like .html, .jpg, etc.
         r'(\?\S*)?'                     # optional query parameters
         r'(#\S*)?$',                    # optional fragment
+        # r'^(https?):\/\/'                         # http, https protocols
+        # r'(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})'        # domain name (example.com, etc.)
+        # r'(:[0-9]{1,5})?'                         # optional port (e.g., :8080)
+        # r'(\/[a-zA-Z0-9._~:/?#\[\]@!$&\'()*+,;=-]*)*$',  # path, query, and fragment
         re.IGNORECASE
     )
 
