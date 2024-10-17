@@ -55,7 +55,7 @@ def domain_extractor(url: str) -> str:
     :return: Stripped URL domain name, e.g. "example"
     """   
     parsed_url = urlparse(url)
-    domain = parsed_url.netloc
+    domain = parsed_url.netloc.split(':')[0]  # Strip port if present
     full_domain = get_sld(domain)
     tld = get_tld(domain)
     if full_domain and tld:
