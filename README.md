@@ -1,4 +1,4 @@
-`recipe-database-scraper` is a simple Python package designed for gathering recipes from a website in order to maintain a database.
+`recipe-database-scraper` is a simple Python package that gathers all recipes from a website in order to maintain a database.
 
 <br>
 
