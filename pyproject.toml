@@ -25,6 +25,17 @@ flake8 = "^7.1.1"
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.3"
 
+[tool.pytest.ini_options]
+python_files = "test_*"
+python_classes = "*Tests"
+python_functions = "test_*"
+
+markers = [
+    "util: marks util test that support scripts",
+    "sitemap: marks sitemap collection and extraction tests",
+    "recipe: marks recipe colleciton and extraction tests"
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
