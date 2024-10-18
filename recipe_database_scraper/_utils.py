@@ -85,7 +85,7 @@ def strip_url_to_homepage(url: str) -> str:
 
     return url
 
-def robot_parser(url: str) -> object:
+def robots_parser(url: str) -> object:
     """
     Check robots.txt file for allowed/disallowed pages to crawl & crawl conditions
 

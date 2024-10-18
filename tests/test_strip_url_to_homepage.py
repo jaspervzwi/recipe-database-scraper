@@ -1,5 +1,5 @@
 import pytest
-from urllib.parse import urlunparse, urlparse
+from urllib.parse import urlparse
 from recipe_database_scraper._utils import strip_url_to_homepage
 
 @pytest.mark.util

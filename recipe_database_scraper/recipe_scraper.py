@@ -4,7 +4,7 @@ from recipe_scrapers import scrape_html, scraper_exists_for
 
 from .sitemap_scraper import SitemapScraper
 from .get_html import HTMLScraper
-from ._utils import FileHandler, robot_parser, is_valid_url
+from ._utils import FileHandler, robots_parser, is_valid_url
 
 class Recipe:
     def __init__(self, recipe_dict: dict):
@@ -60,10 +60,10 @@ class RecipeScraper:
         self.pages_without_recipe = []
         self.batch_buffer = 0
         try: 
-            self.robot_parser = robot_parser(self.url)
+            self.robots_parser = robots_parser(self.url)
         except Exception:
             print("Cannot find robots.txt ")
-            self.robot_parser = None
+            self.robots_parser = None
 
     def _recipe_scraper_supported(self) -> bool:
         '''Check if website is supported by recipe-scrapers lib. If not, return value '''
@@ -175,7 +175,7 @@ class RecipeScraper:
             status_message = f"{current_time} INFO [{str(scrape_count)}/{str(len_scraped_pages)}]: "
 
             # Proceed if robots.txt allows fetching the url or robots.txt isn't found 
-            if self.robot_parser is None or self.robot_parser.can_fetch(self.user_agent, self.url):
+            if self.robots_parser is None or self.robots_parser.can_fetch(self.user_agent, self.url):
 
                 is_in_pages_without_recipe = p.page_url in self.pages_without_recipe
                 
