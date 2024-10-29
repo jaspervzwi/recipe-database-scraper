@@ -65,7 +65,10 @@ class Pages:
         return iter(self.pages)
     
     def __len__(self):
-        return len(self.pages) 
+        return len(self.pages)
+    
+    def __getitem__(self, list_number):
+        return self.pages[list_number]
     
     def add_list(self, page_list: list):
         self.pages.extend(page_list)
@@ -84,13 +87,33 @@ class SitemapScraper:
             self.sitemap_tree = sitemap_tree_for_homepage(stripped_homepage)
         except Exception as e:
             raise SitemapScraperException(self.homepage, stripped_homepage, e)
-    
+        
+    def _get_all_pages(self) -> list:
+        '''Return a list of sitemap page objects'''
+        def _get_pages(sitemap):
+            """Recursively extract page objects from the sitemap and it's sub-sitemaps.
+            The all_pages() iterator can in some instances capture pages of sub-sitemaps. Therefore, loop through the sub-sitemaps and dedouble the urls at the end"""
+            
+            all_pages = []
+
+            all_pages.extend([page for page in sitemap.all_pages()])
+
+            for sub_sitemap in getattr(sitemap, 'sub_sitemaps', []):
+                all_pages.extend(_get_pages(sub_sitemap))
+
+            return all_pages
+
+        # Remove potential duplicate pages
+        pages_dedoubled = set(_get_pages(self.sitemap_tree))
+        pages_list = list(pages_dedoubled)
+
+        return pages_list
     
     def _get_filter_urls(self) -> list:
         '''Return a list of urls filtered from the sitemap pages for specified keywords.'''
         def _filter_out_pages(sitemap):
-            """Recursively extract page objects from the sitemap that match unwanted URLs or sitemaps.
-            The all_pages() iterator also captures pages of sub-sitemaps. Therefore, loop through the sub-sitemaps and dedouble the urls at the end"""
+            """Recursively extract page objects from the sitemap  and it's sub-sitemaps that match unwanted URLs or sitemaps.
+            The all_pages() iterator can in some instances capture pages of sub-sitemaps. Therefore, loop through the sub-sitemaps and dedouble the urls at the end"""
 
             filter_page_urls = []
 
@@ -106,7 +129,7 @@ class SitemapScraper:
             # Sitemaps can contain sub_sitemaps. Recursively extract URLs from sub-sitemaps
             for sub_sitemap in getattr(sitemap, 'sub_sitemaps', []):
                 filter_page_urls.extend(_filter_out_pages(sub_sitemap))
-            
+
             return filter_page_urls
 
         # Remove potential duplicate filtered pages
@@ -119,8 +142,8 @@ class SitemapScraper:
     def _scrape_domain(self):
         '''Populate self.pages with Page objects of url & last modified date for filtered pages & populate self.filtered_out_urls list with all other urls'''
         self._scrape_sitemap()
-        all_pages = [page for page in self.sitemap_tree.all_pages()]
-        all_pages_dedoubled = list(set(all_pages)) # Remove duplicates and reset type to list for list comprehension
+        
+        all_pages = self._get_all_pages()
 
         self.filtered_out_urls = self._get_filter_urls()
         filter_urls_set = set(self.filtered_out_urls) # Convert list of urls to set for faster membership checking
@@ -130,7 +153,7 @@ class SitemapScraper:
                 p.url, 
                 getattr(p.last_modified, "isoformat", lambda: None)() # Fallback to None in case sitemaps do not capture last modified dates
             ) 
-            for p in all_pages_dedoubled
+            for p in all_pages
             if p.url not in filter_urls_set
         ]
 
