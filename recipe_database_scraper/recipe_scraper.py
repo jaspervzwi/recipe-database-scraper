@@ -165,7 +165,7 @@ class RecipeScraper:
         len_filtered_out_urls = len(filtered_out_urls)
         len_sitemap_pages = len_scraped_pages + len_filtered_out_urls
         print(f"Found {str(len_sitemap_pages)} pages in sitemap")
-        print(f"Found {str(len_filtered_out_urls)} pages that cannot contain recipes. Continuing with remaining {str(len_scraped_pages)} pages")
+        print(f"Found {str(len_filtered_out_urls)} pages in sitemap that should not contain recipes. Continuing with remaining {str(len_scraped_pages)} pages")
 
         if len_filtered_out_urls > 0:
             self.recipes.add_non_recipe_page_list(filtered_out_urls)         
