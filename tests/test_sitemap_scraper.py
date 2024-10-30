@@ -91,16 +91,36 @@ def test_sub_sitemaps_filtering(mock_sitemap_tree_for_homepage):
     assert len(filtered_out_urls) == 4  # 2 pages from each of the filtered sub-sitemaps
 
 
-# Test filtering logic directly
 @pytest.mark.sitemap
-def test_sitemap_scraper_filtering():
+def test_sitemap_get_pages():
+    """Test the get pages logic of the SitemapScraper."""
+    scraper = SitemapScraper("https://example.com")
+    scraper.sitemap_tree = mock_sitemap_sms
+
+    all_pages = scraper._get_all_pages()
+
+    all_pages_urls = [page.url for page in all_pages]
+
+    test_urls = [
+        "https://example.com/recipes/page1",
+        "https://example.com/sub-sitemap2/page1",
+        "https://example.com/blog/post1"
+    ]
+
+    assert len(all_pages) == 7
+    for test_url in test_urls:
+        assert test_url in all_pages_urls
+
+
+@pytest.mark.sitemap
+def test_sitemap_scraper_url_filtering():
     """Test the filtering logic of the SitemapScraper."""
     scraper = SitemapScraper("https://example.com")
-    scraper.sitemap_tree = mock_sitemap_sms  # Set the mocked sitemap manually
+    scraper.sitemap_tree = mock_sitemap_sms 
 
     filtered_urls = scraper._get_filter_urls()
 
-    # Since the URL "https://example.com/private/page" should match the filter keywords, it should be filtered out
+    # Since the URL "https://example.com/sub-sitemap2/page1" should match the filter keywords, it should be filtered out
     assert "https://example.com/sub-sitemap2/page1" in filtered_urls
     assert "https://example.com/recipes/page1" not in filtered_urls
 
