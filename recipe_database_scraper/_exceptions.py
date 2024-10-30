@@ -36,13 +36,15 @@ class SitemapScraperException(AllExceptions):
     Page_scraper: unable to read sitemap of given website
     """
     def __init__(self, url, stripped_url, exception):
-        message = f"Unable to read sitemap for URL {url}\n"
-        + "Please check if a sitemap is available in one of the following locations:\n"
-        + f"{stripped_url}robots.txt\n"
-        + f"{stripped_url}sitemap.xml\n"
-        + f"{stripped_url}sitemap-index.xml"
-        + "---\n"
-        + f"Exception: {exception}"
+        message = (
+            f"Unable to read sitemap for URL {url}\n"
+            "Please check if a sitemap is available in one of the following locations:\n"
+            f"{stripped_url}robots.txt\n"
+            f"{stripped_url}sitemap.xml\n"
+            f"{stripped_url}sitemap-index.xml"
+            "---\n"
+            f"Exception: {exception}"
+        )
         super().__init__(message)
 
 class InputException(AllExceptions):

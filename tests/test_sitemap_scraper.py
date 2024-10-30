@@ -7,7 +7,6 @@ from recipe_database_scraper.sitemap_scraper import SitemapScraper, Page, Pages,
 mock_sitemap_page_1 = MagicMock(url="https://example.com/recipe/1", last_modified=None)
 mock_sitemap_page_2 = MagicMock(url="https://example.com/blog/page", last_modified=None)
 
-
 mock_filtered_pages = [
     MagicMock(url=f"https://example.com/page{keyword}", last_modified=None)
     for keyword in URL_FILTER_KEYWORDS
@@ -21,7 +20,7 @@ mock_sitemap_urls.url = "https://example.com/sitemap.xml"
 @pytest.mark.sitemap
 @patch("recipe_database_scraper.sitemap_scraper.sitemap_tree_for_homepage")
 def test_url_filtering(mock_sitemap_tree_for_homepage):
-    """Test the SitemapScraper with mocked sitemap data."""
+    """Test the SitemapScraper and url filters with mocked sitemap data."""
     mock_sitemap_tree_for_homepage.return_value = mock_sitemap_urls
 
     scraper = SitemapScraper("https://example.com")
@@ -68,6 +67,7 @@ mock_sitemap_sms.all_pages.return_value = [
 ]
 mock_sitemap_sms.sub_sitemaps = [mock_sub_sitemap_1, mock_sub_sitemap_2, mock_sub_sitemap_3]
 
+
 @pytest.mark.sitemap
 @patch("recipe_database_scraper.sitemap_scraper.sitemap_tree_for_homepage")
 def test_sub_sitemaps_filtering(mock_sitemap_tree_for_homepage):
@@ -76,14 +76,6 @@ def test_sub_sitemaps_filtering(mock_sitemap_tree_for_homepage):
 
     scraper = SitemapScraper("https://example.com")
     pages, filtered_out_urls = scraper.scrape()
-
-    print("found pages:")
-    for page in pages:
-        print(page)
-
-    print("filtered out:")
-    for p in filtered_out_urls:
-        print(p)
 
     # Check that the main sitemap's non-filtered pages are included
     assert len(pages) == 3  # Main sitemap's page + mock_sub_sitemap_1 pages
@@ -98,3 +90,51 @@ def test_sub_sitemaps_filtering(mock_sitemap_tree_for_homepage):
     # Verify the number of filtered URLs matches the expected count from both sub-sitemaps
     assert len(filtered_out_urls) == 4  # 2 pages from each of the filtered sub-sitemaps
 
+
+# Test filtering logic directly
+@pytest.mark.sitemap
+def test_sitemap_scraper_filtering():
+    """Test the filtering logic of the SitemapScraper."""
+    scraper = SitemapScraper("https://example.com")
+    scraper.sitemap_tree = mock_sitemap_sms  # Set the mocked sitemap manually
+
+    filtered_urls = scraper._get_filter_urls()
+
+    # Since the URL "https://example.com/private/page" should match the filter keywords, it should be filtered out
+    assert "https://example.com/sub-sitemap2/page1" in filtered_urls
+    assert "https://example.com/recipes/page1" not in filtered_urls
+
+
+@pytest.mark.sitemap
+@patch("recipe_database_scraper.sitemap_scraper.sitemap_tree_for_homepage", side_effect=Exception("Sitemap parsing error"))
+def test_sitemap_scraper_exception(mock_sitemap_tree_for_homepage):
+    """Test the SitemapScraper handling a sitemap parsing exception."""
+    scraper = SitemapScraper("https://example.com")
+
+    with pytest.raises(SitemapScraperException, match="Sitemap parsing error"):
+        scraper.scrape()
+
+
+@pytest.mark.sitemap
+def test_page_object():
+    """Test the Page object and its string representation."""
+    page = Page("https://example.com/recipe/1", "2024-10-18")
+    assert str(page) == "URL: https://example.com/recipe/1, Last Modified: 2024-10-18"
+
+    page_no_date = Page("https://example.com/recipe/1", None)
+    assert str(page_no_date) == "URL: https://example.com/recipe/1, Last Modified: Unknown"
+
+
+@pytest.mark.sitemap
+def test_pages_class():
+    """Test the Pages class functionality."""
+    pages = Pages()
+    assert len(pages) == 0
+
+    page_1 = Page("https://example.com/recipe/1", None)
+    page_2 = Page("https://example.com/recipe/2", "2024-10-18")
+    pages.add_list([page_1, page_2])
+
+    assert len(pages) == 2
+    assert pages[0] == page_1
+    assert list(pages) == [page_1, page_2]
