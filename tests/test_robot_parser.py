@@ -1,7 +1,7 @@
 import pytest
 import robots
 from unittest.mock import patch
-from recipe_database_scraper._utils import robot_parser
+from recipe_database_scraper._utils import robots_parser
 from recipe_database_scraper._exceptions import RobotParserException
 
 robots_mock_content = """
@@ -26,7 +26,7 @@ def test_robot_parser(mock_from_uri):
     mock_from_uri.return_value = mock_parser
 
     url = "https://www.allrecipes.com/recipe/12345/"
-    parser = robot_parser(url)
+    parser = robots_parser(url)
 
     mock_from_uri.assert_called_once_with("https://www.allrecipes.com/robots.txt")
 
@@ -47,4 +47,4 @@ def test_robot_parser_no_robots_file(mock_from_uri):
     """Test the robot_parser function when robots.txt file is missing."""
     url = "https://www.allrecipes.com/recipe/12345/"
     with pytest.raises(RobotParserException, match=f"Cannot find robots.txt file for {url}"):
-        robot_parser(url)
+        robots_parser(url)
