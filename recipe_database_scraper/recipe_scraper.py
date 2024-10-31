@@ -57,6 +57,7 @@ class RecipeScraper:
         self.user_agent = user_agent
         self.recipes = Recipes()
         self.website_supported = False
+        self._recipe_scraper_supported()
         self.pages_without_recipe = []
         self.batch_buffer = 0
         try: 
@@ -66,9 +67,11 @@ class RecipeScraper:
             self.robots_parser = None
 
     def _recipe_scraper_supported(self) -> bool:
-        '''Check if website is supported by recipe-scrapers lib. If not, return value '''
+        '''Check if website is supported by recipe-scrapers lib. If not, return value'''
         website_supported = scraper_exists_for(self.url)
-        if not website_supported:
+        if website_supported:
+            self.website_supported = website_supported
+        else:
             print(         
                 f"The website '{self.url}' is not supported by default in the parent library: recipe-scrapers!\n"
                 + "---\n"
@@ -80,7 +83,6 @@ class RecipeScraper:
                 + "More information on: https://github.com/hhursev/recipe-scrapers?tab=readme-ov-file#if-you-want-a-scraper-for-a-new-site-added\n"
                 + "---"
                 )
-        return 
     
     def _handle_input_dict(self, input_dict: dict):
         '''Check input_dict for:
@@ -155,7 +157,6 @@ class RecipeScraper:
             output_file: str | None = None,
             batch_size: int | None = None
         ):
-        self.website_supported = self._recipe_scraper_supported()
 
         input_dict = self._handle_input_dict(input_dict)
 
@@ -204,4 +205,3 @@ class RecipeScraper:
         
         recipes_json = self.recipes.to_json()
         return recipes_json
-
