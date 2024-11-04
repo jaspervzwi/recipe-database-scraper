@@ -15,30 +15,32 @@ def is_valid_url(url: str) -> bool:
     """
     if not url:
         raise InvalidURLException("URL is empty.")
-    
+
     try:
         parsed_url = urlparse(url)
     except Exception as ex:
         raise InvalidURLException(f"Unable to parse URL {url}: {ex}")
-    
+
     if not parsed_url.scheme:
-        raise InvalidURLException("Scheme must be set. Please prefix http:// or https://")
-    
-    if parsed_url.scheme.lower() not in ['http', 'https']:
+        raise InvalidURLException(
+            "Scheme must be set. Please prefix http:// or https://"
+        )
+
+    if parsed_url.scheme.lower() not in ["http", "https"]:
         raise InvalidURLException("Scheme must be http:// or https://")
-    
+
     if not parsed_url.netloc:
         raise InvalidURLException(f"Cannot determine domain name from {url}")
-    
+
     regex_url = re.compile(
-        r'^(https?):\/\/'               # http, https protocols
-        r'(\w+(\-\w+)*\.)+[a-z]{2,}'    # domain name (example.com, etc.)
-        r'(:[0-9]{1,5})?'               # optional port (e.g., :8080)
-        r'(\/[\w\-]*)*'                 # optional path (e.g. /something)
-        r'(\.[a-zA-Z0-9]{1,5})?'        # optional file extension like .html, .jpg, etc.
-        r'(\?\S*)?'                     # optional query parameters
-        r'(#\S*)?$',                    # optional fragment
-        re.IGNORECASE
+        r"^(https?):\/\/"  # http, https protocols
+        r"(\w+(\-\w+)*\.)+[a-z]{2,}"  # domain name (example.com, etc.)
+        r"(:[0-9]{1,5})?"  # optional port (e.g., :8080)
+        r"(\/[\w\-]*)*"  # optional path (e.g. /something)
+        r"(\.[a-zA-Z0-9]{1,5})?"  # optional file extension like .html, .jpg, etc.
+        r"(\?\S*)?"  # optional query parameters
+        r"(#\S*)?$",  # optional fragment
+        re.IGNORECASE,
     )
 
     if re.match(regex_url, url):
@@ -53,16 +55,17 @@ def domain_extractor(url: str) -> str:
 
     :param url: URL to strip, e.g. "http://www.example.com/page.html".
     :return: Stripped URL domain name, e.g. "example"
-    """   
+    """
     parsed_url = urlparse(url)
-    domain = parsed_url.netloc.split(':')[0]  # Strip port if present
+    domain = parsed_url.netloc.split(":")[0]  # Strip port if present
     full_domain = get_sld(domain)
     tld = get_tld(domain)
     if full_domain and tld:
         main_domain = full_domain.replace(f".{tld}", "")
-        return main_domain.split('.')[-1]  # Get the last part (SLD) without subdomains
+        return main_domain.split(".")[-1]  # Get the last part (SLD) without subdomains
     else:
         return full_domain
+
 
 def strip_url_to_homepage(url: str) -> str:
     """
@@ -71,19 +74,20 @@ def strip_url_to_homepage(url: str) -> str:
     :param url: URL to strip, e.g. "http://www.example.com/page.html".
     :return: Stripped homepage URL, e.g. "http://www.example.com/"
     """
-    
+
     parsed_url = urlparse(url)
     parsed_url = (
         parsed_url.scheme,
         parsed_url.netloc,
-        '/',  # path
-        '',  # params
-        '',  # query
-        '',  # fragment
+        "/",  # path
+        "",  # params
+        "",  # query
+        "",  # fragment
     )
     url = urlunparse(parsed_url)
 
     return url
+
 
 def robots_parser(url: str) -> object:
     """
@@ -97,16 +101,19 @@ def robots_parser(url: str) -> object:
     robots_file = stripped_domain_url + "robots.txt"
     try:
         parser = robots.RobotsParser.from_uri(robots_file)
-    except:
-        raise RobotParserException(f"Cannot find robots.txt file for {url}\nPlease check if {robots_file} exists")
+    except Exception as ex:
+        raise RobotParserException(
+            f"Cannot find robots.txt file for {url}\nPlease check if {robots_file} exists.\nError: {ex}"
+        )
 
     return parser
 
 
-class FileHandler():
+class FileHandler:
     """
     Handle opening & writing of files
     """
+
     def __init__(self, filename):
         self.filename = filename
 
@@ -116,7 +123,7 @@ class FileHandler():
 
         content = json.loads(data)
         return content
-    
+
     def write_json_file(self, data):
-        with open(self.filename, 'w') as my_file:
+        with open(self.filename, "w") as my_file:
             json.dump(data, my_file)

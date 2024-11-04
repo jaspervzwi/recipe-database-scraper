@@ -1,82 +1,94 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from datetime import datetime
 from recipe_scrapers import get_supported_urls
 from recipe_database_scraper.recipe_scraper import Recipe, Recipes, RecipeScraper
 
 # Mock data for testing
 MOCK_RECIPE_DICT = {
-    'page_url': 'https://example.com/recipe',
-    'last_modified': '2000-01-01',
-    'canonical_url': 'https://example.com/recipe',
-    'site_name': 'Example Site',
-    'host': 'example.com',
-    'language': 'en',
-    'title': 'Test Recipe',
-    'author': 'Itsame Mario',
-    'ingredients': ['green mushroom', 'green turtle shell'],
-    'ingredient_groups': [],
-    'instructions_list': ['Hit box', 'Jump on turtle'],
-    'category': 'Dinner',
-    'yields': '4 servings',
-    'total_time': '1 hour',
-    'cook_time': '30 minutes',
-    'prep_time': '30 minutes',
-    'ratings': 5,
-    'ratings_count': 100,
-    'nutrients': {'calories': 200},
-    'image': 'https://example.com/image.jpg'
+    "page_url": "https://example.com/recipe",
+    "last_modified": "2000-01-01",
+    "canonical_url": "https://example.com/recipe",
+    "site_name": "Example Site",
+    "host": "example.com",
+    "language": "en",
+    "title": "Test Recipe",
+    "author": "Itsame Mario",
+    "ingredients": ["green mushroom", "green turtle shell"],
+    "ingredient_groups": [],
+    "instructions_list": ["Hit box", "Jump on turtle"],
+    "category": "Dinner",
+    "yields": "4 servings",
+    "total_time": "1 hour",
+    "cook_time": "30 minutes",
+    "prep_time": "30 minutes",
+    "ratings": 5,
+    "ratings_count": 100,
+    "nutrients": {"calories": 200},
+    "image": "https://example.com/image.jpg",
 }
 
 
 # ---- Tests for Recipe class ----
+
 
 @pytest.mark.recipe
 def test_recipe_structure():
     """Test that Recipe class correctly stores recipe data."""
     recipe = Recipe(MOCK_RECIPE_DICT)
     recipe.structure()
-    assert recipe.url == MOCK_RECIPE_DICT['page_url']
-    assert recipe.title == MOCK_RECIPE_DICT['title']
-    assert recipe.author == MOCK_RECIPE_DICT['author']
-    assert recipe.ingredients == MOCK_RECIPE_DICT['ingredients']
+    assert recipe.url == MOCK_RECIPE_DICT["page_url"]
+    assert recipe.title == MOCK_RECIPE_DICT["title"]
+    assert recipe.author == MOCK_RECIPE_DICT["author"]
+    assert recipe.ingredients == MOCK_RECIPE_DICT["ingredients"]
 
 
 # ---- Tests for Recipes class ----
+
 
 @pytest.mark.recipe
 def test_recipes_add_recipe():
     """Test that Recipes class can add a recipe."""
     recipes = Recipes()
     recipe = Recipe(MOCK_RECIPE_DICT)
-    recipes.add_recipe(recipe.recipe_dict['page_url'], recipe)
-    assert recipe.recipe_dict['page_url'] in recipes.recipes
-    assert recipes.recipes[recipe.recipe_dict['page_url']]['title'] == recipe.recipe_dict['title']
+    recipes.add_recipe(recipe.recipe_dict["page_url"], recipe)
+    assert recipe.recipe_dict["page_url"] in recipes.recipes
+    assert (
+        recipes.recipes[recipe.recipe_dict["page_url"]]["title"]
+        == recipe.recipe_dict["title"]
+    )
+
 
 @pytest.mark.recipe
 def test_recipes_add_non_recipe_page():
     """Test that Recipes class can track non-recipe pages."""
     recipes = Recipes()
     recipes.add_non_recipe_page("https://example.com/non-recipe-page")
-    recipes.add_non_recipe_page_list(["https://example.com/definitely_not_a_recipe","https://example.com/absolutely_not_a_recipe"])
+    recipes.add_non_recipe_page_list(
+        [
+            "https://example.com/definitely_not_a_recipe",
+            "https://example.com/absolutely_not_a_recipe",
+        ]
+    )
     assert "https://example.com/non-recipe-page" in recipes.pages_without_recipe
     assert "https://example.com/definitely_not_a_recipe" in recipes.pages_without_recipe
     assert "https://example.com/absolutely_not_a_recipe" in recipes.pages_without_recipe
+
 
 @pytest.mark.recipe
 def test_recipes_to_json():
     """Test that Recipes class outputs data in JSON format."""
     recipes = Recipes()
     recipe = Recipe(MOCK_RECIPE_DICT)
-    recipes.add_recipe(recipe.recipe_dict['page_url'], recipe)
+    recipes.add_recipe(recipe.recipe_dict["page_url"], recipe)
     recipes.add_non_recipe_page("https://example.com/non-recipe-page")
     output = recipes.to_json()
     assert "Pages without Recipe" in output
     assert "https://example.com/non-recipe-page" in output["Pages without Recipe"]
-    assert recipe.recipe_dict['page_url'] in output
+    assert recipe.recipe_dict["page_url"] in output
 
 
 # ---- Tests for RecipeScraper class ----
+
 
 @pytest.fixture
 def mock_recipe_scraper():
@@ -84,8 +96,9 @@ def mock_recipe_scraper():
     scraper = RecipeScraper("https://example.com", "test-agent")
     return scraper
 
+
 @pytest.mark.recipe
-@patch('recipe_database_scraper.recipe_scraper.robots_parser')
+@patch("recipe_database_scraper.recipe_scraper.robots_parser")
 def test_recipe_scraper_initialization(mock_robots_parser, mock_recipe_scraper):
     """Test initialization of RecipeScraper and robots_parser loading."""
     mock_robots_parser.return_value = MagicMock()
@@ -93,8 +106,9 @@ def test_recipe_scraper_initialization(mock_robots_parser, mock_recipe_scraper):
     assert mock_recipe_scraper.user_agent == "test-agent"
     assert mock_recipe_scraper.robots_parser is not None
 
+
 @pytest.mark.recipe
-@patch('recipe_database_scraper.recipe_scraper.scraper_exists_for', return_value=True)
+@patch("recipe_database_scraper.recipe_scraper.scraper_exists_for", return_value=True)
 def test_recipe_scraper_supported(mock_scraper_exists_for):
     """Test that the recipe scraper checks that a website is supported."""
     supported_urls = get_supported_urls()
@@ -104,23 +118,26 @@ def test_recipe_scraper_supported(mock_scraper_exists_for):
     assert result is True
     mock_scraper_exists_for.assert_called_once_with(scraper.url)
 
+
 @pytest.mark.recipe
 def test_recipe_scraper_not_supported(mock_recipe_scraper):
     """Test that the recipe scraper checks that a website is not supported."""
     result = mock_recipe_scraper.website_supported
     assert result is False
 
+
 @pytest.mark.recipe
-@patch('recipe_database_scraper.recipe_scraper.is_valid_url', return_value=True)
+@patch("recipe_database_scraper.recipe_scraper.is_valid_url", return_value=True)
 def test_handle_input_dict(mock_is_valid_url, mock_recipe_scraper):
     """Test handling of input dict to identify pages without recipes and invalid URLs."""
     input_dict = {
         "https://example.com/recipe": MOCK_RECIPE_DICT,
-        "Pages without Recipe": ["https://example.com/non-recipe"]
+        "Pages without Recipe": ["https://example.com/non-recipe"],
     }
     handled_dict = mock_recipe_scraper._handle_input_dict(input_dict)
     assert "Pages without Recipe" not in handled_dict
     assert handled_dict["https://example.com/recipe"] == MOCK_RECIPE_DICT
+
 
 @pytest.mark.recipe
 def test_url_in_input_data(mock_recipe_scraper):
@@ -132,40 +149,54 @@ def test_url_in_input_data(mock_recipe_scraper):
     result = mock_recipe_scraper._url_in_input_data(page_mock, input_dict)
     assert result == input_dict["https://example.com/recipe"]
 
+
 @pytest.mark.recipe
-@patch('recipe_database_scraper.recipe_scraper.HTMLScraper')
-@patch('recipe_database_scraper.recipe_scraper.scrape_html')
+@patch("recipe_database_scraper.recipe_scraper.HTMLScraper")
+@patch("recipe_database_scraper.recipe_scraper.scrape_html")
 def test_scrape_recipe_page(mock_scrape_html, mock_html_scraper, mock_recipe_scraper):
     """Test scraping a recipe page for valid schema data."""
     mock_html_scraper().scrape_page.return_value = "<html></html>"
     mock_scrape_html.return_value.to_json.return_value = MOCK_RECIPE_DICT
-    recipe = mock_recipe_scraper._scrape_recipe_page("https://example.com/recipe", "2000-01-01")
+    recipe = mock_recipe_scraper._scrape_recipe_page(
+        "https://example.com/recipe", "2000-01-01"
+    )
     assert recipe.recipe_dict == MOCK_RECIPE_DICT
 
+
 @pytest.mark.recipe
-@patch('recipe_database_scraper.recipe_scraper.FileHandler')
+@patch("recipe_database_scraper.recipe_scraper.FileHandler")
 def test_write_batch(mock_file_handler, mock_recipe_scraper):
     """Test that _write_batch writes to file after reaching batch size."""
     mock_file_handler.return_value = MagicMock()
     mock_recipe_scraper.batch_buffer = 3
     mock_recipe_scraper.recipes = MagicMock()
     mock_recipe_scraper._write_batch(3, "test_output.json")
-    mock_file_handler.return_value.write_json_file.assert_called_once_with(mock_recipe_scraper.recipes.to_json())
+    mock_file_handler.return_value.write_json_file.assert_called_once_with(
+        mock_recipe_scraper.recipes.to_json()
+    )
     assert mock_recipe_scraper.batch_buffer == 0
 
+
 @pytest.mark.recipe
-@patch('recipe_database_scraper.recipe_scraper.RecipeScraper._scrape_recipe_page')
-@patch('recipe_database_scraper.recipe_scraper.SitemapScraper')
-def test_scrape_to_json(mock_sitemap_scraper, mock_scrape_recipe_page, mock_recipe_scraper):
+@patch("recipe_database_scraper.recipe_scraper.RecipeScraper._scrape_recipe_page")
+@patch("recipe_database_scraper.recipe_scraper.SitemapScraper")
+def test_scrape_to_json(
+    mock_sitemap_scraper, mock_scrape_recipe_page, mock_recipe_scraper
+):
     """Test the scrape_to_json main flow, ensuring output JSON structure."""
     mock_page = MagicMock()
     mock_page.page_url = "https://example.com/recipe"
     mock_page.last_modified = "2000-01-01"
     mock_non_recipe_page = "https://example.com/not-a-recipe"
-    mock_sitemap_scraper.return_value.scrape.return_value = ([mock_page], [mock_non_recipe_page])
-    mock_scrape_recipe_page.return_value = Recipe({"title": "Test Soup Recipe", "ingredients": ["Food", "Water"]})
+    mock_sitemap_scraper.return_value.scrape.return_value = (
+        [mock_page],
+        [mock_non_recipe_page],
+    )
+    mock_scrape_recipe_page.return_value = Recipe(
+        {"title": "Test Soup Recipe", "ingredients": ["Food", "Water"]}
+    )
     json_output = mock_recipe_scraper.scrape_to_json()
     assert "https://example.com/recipe" in json_output
-    assert "Pages without Recipe" in json_output 
+    assert "Pages without Recipe" in json_output
     assert "https://example.com/not-a-recipe" in json_output["Pages without Recipe"]
     assert "https://example.com/recipe" not in json_output["Pages without Recipe"]

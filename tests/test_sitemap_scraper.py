@@ -1,7 +1,13 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from recipe_database_scraper._exceptions import SitemapScraperException
-from recipe_database_scraper.sitemap_scraper import SitemapScraper, Page, Pages, SITEMAP_FILTER_KEYWORDS, URL_FILTER_KEYWORDS
+from recipe_database_scraper.sitemap_scraper import (
+    SitemapScraper,
+    Page,
+    Pages,
+    SITEMAP_FILTER_KEYWORDS,
+    URL_FILTER_KEYWORDS,
+)
 
 # Mocked example of pages
 mock_sitemap_page_1 = MagicMock(url="https://example.com/recipe/1", last_modified=None)
@@ -13,7 +19,10 @@ mock_filtered_pages = [
 ]
 
 mock_sitemap_urls = MagicMock()
-mock_sitemap_urls.all_pages.return_value = [mock_sitemap_page_1, mock_sitemap_page_2] + mock_filtered_pages
+mock_sitemap_urls.all_pages.return_value = [
+    mock_sitemap_page_1,
+    mock_sitemap_page_2,
+] + mock_filtered_pages
 mock_sitemap_urls.url = "https://example.com/sitemap.xml"
 
 
@@ -38,25 +47,29 @@ def test_url_filtering(mock_sitemap_tree_for_homepage):
 
 # Mocked sub-sitemap that should not be filtered
 mock_sub_sitemap_1 = MagicMock()
-mock_sub_sitemap_1.url = f"https://example.com/recipes-sitemap.xml"
+mock_sub_sitemap_1.url = "https://example.com/recipes-sitemap.xml"
 mock_sub_sitemap_1.all_pages.return_value = [
     MagicMock(url="https://example.com/recipes/page1", last_modified=None),
-    MagicMock(url="https://example.com/recipes/page2", last_modified=None)
+    MagicMock(url="https://example.com/recipes/page2", last_modified=None),
 ]
 
 # Mocked sub-sitemaps that should be filtered based on SITEMAP keywords
 mock_sub_sitemap_2 = MagicMock()
-mock_sub_sitemap_2.url = f"https://example.com/{list(SITEMAP_FILTER_KEYWORDS)[0]}-sub-sitemap.xml"
+mock_sub_sitemap_2.url = (
+    f"https://example.com/{list(SITEMAP_FILTER_KEYWORDS)[0]}-sub-sitemap.xml"
+)
 mock_sub_sitemap_2.all_pages.return_value = [
     MagicMock(url="https://example.com/sub-sitemap2/page1", last_modified=None),
-    MagicMock(url="https://example.com/sub-sitemap2/page2", last_modified=None)
+    MagicMock(url="https://example.com/sub-sitemap2/page2", last_modified=None),
 ]
 
 mock_sub_sitemap_3 = MagicMock()
-mock_sub_sitemap_3.url = f"https://example.com/{list(SITEMAP_FILTER_KEYWORDS)[1]}-sub-sitemap.xml"
+mock_sub_sitemap_3.url = (
+    f"https://example.com/{list(SITEMAP_FILTER_KEYWORDS)[1]}-sub-sitemap.xml"
+)
 mock_sub_sitemap_3.all_pages.return_value = [
     MagicMock(url="https://example.com/sub-sitemap3/page1", last_modified=None),
-    MagicMock(url="https://example.com/sub-sitemap3/page2", last_modified=None)
+    MagicMock(url="https://example.com/sub-sitemap3/page2", last_modified=None),
 ]
 
 # Mock a main sitemap that includes sub-sitemaps and non-filtered pages
@@ -65,7 +78,11 @@ mock_sitemap_sms.url = "https://example.com/sitemap.xml"
 mock_sitemap_sms.all_pages.return_value = [
     MagicMock(url="https://example.com/blog/post1", last_modified=None)
 ]
-mock_sitemap_sms.sub_sitemaps = [mock_sub_sitemap_1, mock_sub_sitemap_2, mock_sub_sitemap_3]
+mock_sitemap_sms.sub_sitemaps = [
+    mock_sub_sitemap_1,
+    mock_sub_sitemap_2,
+    mock_sub_sitemap_3,
+]
 
 
 @pytest.mark.sitemap
@@ -104,7 +121,7 @@ def test_sitemap_get_pages():
     test_urls = [
         "https://example.com/recipes/page1",
         "https://example.com/sub-sitemap2/page1",
-        "https://example.com/blog/post1"
+        "https://example.com/blog/post1",
     ]
 
     assert len(all_pages) == 7
@@ -116,7 +133,7 @@ def test_sitemap_get_pages():
 def test_sitemap_scraper_url_filtering():
     """Test the filtering logic of the SitemapScraper."""
     scraper = SitemapScraper("https://example.com")
-    scraper.sitemap_tree = mock_sitemap_sms 
+    scraper.sitemap_tree = mock_sitemap_sms
 
     filtered_urls = scraper._get_filter_urls()
 
@@ -126,7 +143,10 @@ def test_sitemap_scraper_url_filtering():
 
 
 @pytest.mark.sitemap
-@patch("recipe_database_scraper.sitemap_scraper.sitemap_tree_for_homepage", side_effect=Exception("Sitemap parsing error"))
+@patch(
+    "recipe_database_scraper.sitemap_scraper.sitemap_tree_for_homepage",
+    side_effect=Exception("Sitemap parsing error"),
+)
 def test_sitemap_scraper_exception(mock_sitemap_tree_for_homepage):
     """Test the SitemapScraper handling a sitemap parsing exception."""
     scraper = SitemapScraper("https://example.com")
@@ -142,7 +162,9 @@ def test_page_object():
     assert str(page) == "URL: https://example.com/recipe/1, Last Modified: 2024-10-18"
 
     page_no_date = Page("https://example.com/recipe/1", None)
-    assert str(page_no_date) == "URL: https://example.com/recipe/1, Last Modified: Unknown"
+    assert (
+        str(page_no_date) == "URL: https://example.com/recipe/1, Last Modified: Unknown"
+    )
 
 
 @pytest.mark.sitemap
