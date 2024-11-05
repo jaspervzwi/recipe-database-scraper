@@ -1,4 +1,5 @@
 import re
+import os
 from publicsuffix2 import get_sld, get_tld
 from urllib.parse import urlparse, urlunparse
 import robots
@@ -117,13 +118,63 @@ class FileHandler:
     def __init__(self, filename):
         self.filename = filename
 
-    def load_json_file(self):
-        with open(self.filename) as my_file:
+    def load_exclusion_json_file(self):
+        """Look for _recipe_scraper_exclusions.json file in same directory is as the input file and load its content"""
+        input_dir = (
+            os.path.dirname(self.filename)
+            if os.path.dirname(self.filename)
+            else os.getcwd()
+        )
+
+        exclusion_file = os.path.join(input_dir, "_recipe_scraper_exclusions.json")
+
+        if os.path.isfile(exclusion_file):
+            print(f"Found exclusion file: {exclusion_file}")
+            exclusion_file_content = self.load_json_file(filename=exclusion_file)
+            return exclusion_file_content
+        else:
+            print(
+                "WARNING: No file found with the name '_recipe_scraper_exclusions.json' in the input directory."
+            )
+
+    def write_exclusion_json_file(self, data: dict):
+        """Write or append to the recipe scraper exclusion list file. If it does not exist, create it"""
+        output_dir = (
+            os.path.dirname(self.filename)
+            if os.path.dirname(self.filename)
+            else os.getcwd()
+        )
+
+        exclusion_file = os.path.join(output_dir, "_recipe_scraper_exclusions.json")
+
+        # Extract the single key-value pair from the provided data dict
+        if len(data) != 1:
+            raise ValueError(
+                "Provided data dictionary must contain exactly one key-value pair."
+            )
+
+        key, value = next(iter(data.items()))
+
+        if os.path.isfile(exclusion_file):
+            exclusion_file_content = self.load_json_file(filename=exclusion_file)
+        else:
+            exclusion_file_content = {}
+
+        exclusion_file_content[key] = value
+
+        self.write_json_file(exclusion_file_content, filename=exclusion_file)
+
+    def load_json_file(self, *, filename: str | None = None):
+        """Return the content of the given json file. Unless specified otherwise, this method uses the class's input filename"""
+        json_file = filename if filename else self.filename
+        with open(json_file) as my_file:
             data = my_file.read()
 
         content = json.loads(data)
         return content
 
-    def write_json_file(self, data):
-        with open(self.filename, "w") as my_file:
+    def write_json_file(self, data, *, filename: str | None = None):
+        """Return the content of the given json file. Unless specified otherwise, this method uses the class's input filename"""
+        json_file = filename if filename else self.filename
+        with open(json_file, "w") as my_file:
             json.dump(data, my_file)
