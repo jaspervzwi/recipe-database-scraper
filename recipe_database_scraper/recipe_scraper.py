@@ -61,7 +61,6 @@ class RecipeScraper:
         self.recipes = Recipes()
         self.website_supported = False
         self._recipe_scraper_supported()
-        self.pages_without_recipe = []
         self.batch_buffer = 0
         try:
             self.robots_parser = robots_parser(self.url)
@@ -87,6 +86,22 @@ class RecipeScraper:
                 + "---"
             )
 
+    def _handle_exclusions_list(self, exclusions_list: list, input_dict: dict):
+        """Return pages that should be excluded from def scrape_to_json. Either:
+        - 'Pages without Recipe' key values from input_dict (in case of manual dict input)
+        - 'exclusion_list' file content pulled from input_file location
+        """
+        if input_dict and len(exclusions_list) == 0:
+            input_location = "input dict"
+            exclusions_list = input_dict.pop("Pages without Recipe", [])
+        else:
+            input_location = "_recipe_scraper_exclusions.json file"
+
+        if len(exclusions_list) > 0:
+            print(f"Found {len(exclusions_list)} pages to exclude in {input_location}")
+
+        return exclusions_list
+
     def _handle_input_dict(self, input_dict: dict):
         """Check input_dict for:
         - 'Pages without Recipe' key to exclude in def scrape_to_json
@@ -95,12 +110,8 @@ class RecipeScraper:
         """
         invalid_urls = []
         if input_dict:
-            self.pages_without_recipe = input_dict.pop("Pages without Recipe", [])
+            input_dict.pop("Pages without Recipe", None)  # in case of manual dict input
             print(f"Found {len(input_dict)} pages with recipe in input dict")
-            if len(self.pages_without_recipe) > 0:
-                print(
-                    f"Found {len(self.pages_without_recipe)} pages without recipe in input dict"
-                )
 
             for url in input_dict:
                 try:
@@ -111,6 +122,7 @@ class RecipeScraper:
                 except Exception as e:
                     print("Input key error: " + url + ": " + str(type(e)) + str(e))
                     invalid_urls.append(url)
+
             if len(invalid_urls) > 0:
                 print(
                     "\n---\n"
@@ -163,9 +175,12 @@ class RecipeScraper:
         self,
         *,
         input_dict: dict | None = None,
+        exclusions_list: list | None = [],
         output_file: str | None = None,
         batch_size: int | None = None,
     ):
+
+        pages_without_recipe = self._handle_exclusions_list(exclusions_list, input_dict)
 
         input_dict = self._handle_input_dict(input_dict)
 
@@ -174,48 +189,51 @@ class RecipeScraper:
         len_scraped_pages = len(scraped_pages)
         len_filtered_out_urls = len(filtered_out_urls)
         len_sitemap_pages = len_scraped_pages + len_filtered_out_urls
+
+        scraped_pages.drop_url_list(pages_without_recipe)
+
+        len_pages_to_scrape = len(scraped_pages)
+        len_pages_without_recipe = len(pages_without_recipe)
+
         print(f"Found {str(len_sitemap_pages)} pages in sitemap")
         print(
-            f"Found {str(len_filtered_out_urls)} pages in sitemap that should not contain recipes. Continuing with remaining {str(len_scraped_pages)} pages"
+            f"Found {str(len_filtered_out_urls)} pages in sitemap that should not contain recipes."
+            f"Ignoring {str(len_filtered_out_urls + len_pages_without_recipe)} pages. Continuing with remaining {str(len_pages_to_scrape)} pages"
         )
 
         if len_filtered_out_urls > 0:
             self.recipes.add_non_recipe_page_list(filtered_out_urls)
 
+        if len_pages_without_recipe > 0:
+            self.recipes.add_non_recipe_page_list(pages_without_recipe)
+
         for scrape_count, p in enumerate(scraped_pages, start=1):
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S,%f")[:-3]
-            status_message = (
-                f"{current_time} INFO [{str(scrape_count)}/{str(len_scraped_pages)}]: "
-            )
+            status_message = f"{current_time} INFO [{str(scrape_count)}/{str(len_pages_to_scrape)}]: "
 
             # Proceed if robots.txt allows fetching the url or robots.txt isn't found
             if self.robots_parser is None or self.robots_parser.can_fetch(
                 self.user_agent, self.url
             ):
 
-                is_in_pages_without_recipe = p.page_url in self.pages_without_recipe
+                input_data = (
+                    self._url_in_input_data(p, input_dict) if input_dict else None
+                )
 
-                if is_in_pages_without_recipe:
-                    self.recipes.add_non_recipe_page(p.page_url)
-                else:
-                    input_data = (
-                        self._url_in_input_data(p, input_dict) if input_dict else None
+                if input_data:
+                    recipe = Recipe(input_data)
+                    print(
+                        status_message
+                        + f"Recipe data up-to-date, fetching from input file URL: {p.page_url}"
                     )
+                else:
+                    print(status_message + f"Scraping {p}")
+                    recipe = self._scrape_recipe_page(p.page_url, p.last_modified)
 
-                    if input_data:
-                        recipe = Recipe(input_data)
-                        print(
-                            status_message
-                            + f"Recipe data up-to-date, fetching from input file URL: {p.page_url}"
-                        )
-                    else:
-                        print(status_message + f"Scraping {p}")
-                        recipe = self._scrape_recipe_page(p.page_url, p.last_modified)
-
-                    if recipe:
-                        self.recipes.add_recipe(p.page_url, recipe)
-                    else:
-                        self.recipes.add_non_recipe_page(p.page_url)
+                if recipe:
+                    self.recipes.add_recipe(p.page_url, recipe)
+                else:
+                    self.recipes.add_non_recipe_page(p.page_url)
 
             else:
                 print(

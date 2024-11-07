@@ -68,7 +68,7 @@ def domain_extractor(url: str) -> str:
         return full_domain
 
 
-def strip_url_to_homepage(url: str) -> str:
+def strip_url(url: str) -> str:
     """
     Strip URL to its homepage.
 
@@ -98,7 +98,7 @@ def robots_parser(url: str) -> object:
     :return: robot parser object
     """
 
-    stripped_domain_url = strip_url_to_homepage(url)
+    stripped_domain_url = strip_url(url)
     robots_file = stripped_domain_url + "robots.txt"
     try:
         parser = robots.RobotsParser.from_uri(robots_file)
@@ -129,7 +129,7 @@ class FileHandler:
         exclusion_file = os.path.join(input_dir, "_recipe_scraper_exclusions.json")
 
         if os.path.isfile(exclusion_file):
-            print(f"Found exclusion file: {exclusion_file}")
+            print(f"INFO: Found exclusion file: {exclusion_file}")
             exclusion_file_content = self.load_json_file(filename=exclusion_file)
             return exclusion_file_content
         else:

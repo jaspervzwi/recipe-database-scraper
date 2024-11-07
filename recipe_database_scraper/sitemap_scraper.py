@@ -1,6 +1,6 @@
 from usp.tree import sitemap_tree_for_homepage
 
-from ._utils import is_valid_url, strip_url_to_homepage
+from ._utils import is_valid_url, strip_url
 from ._exceptions import SitemapScraperException
 
 SITEMAP_FILTER_KEYWORDS = {
@@ -102,7 +102,6 @@ class Page:
 
 class Pages:
     def __init__(self):
-
         self.pages = []
 
     def __iter__(self):
@@ -117,6 +116,12 @@ class Pages:
     def add_list(self, page_list: list):
         self.pages.extend(page_list)
 
+    def drop_url_list(self, url_list: list):
+        print(
+            f"Removing {str(len(url_list))} pages from {str(len(self.pages))} in self.pages"
+        )
+        self.pages = [page for page in self.pages if page.page_url not in url_list]
+
 
 class SitemapScraper:
     def __init__(self, homepage):
@@ -127,7 +132,7 @@ class SitemapScraper:
 
     def _scrape_sitemap(self):
         """Retrieve a tree of AbstractSitemap subclass objects that represent the sitemap, including webpages, see https://ultimate-sitemap-parser.readthedocs.io/en/latest/usp.objects.html#module-usp.objects.sitemap"""
-        stripped_homepage = strip_url_to_homepage(self.homepage)
+        stripped_homepage = strip_url(self.homepage)
         try:
             self.sitemap_tree = sitemap_tree_for_homepage(stripped_homepage)
         except Exception as e:

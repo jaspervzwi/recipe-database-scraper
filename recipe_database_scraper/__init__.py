@@ -1,7 +1,7 @@
 __all__ = ["scrape_site", "extract_domain", "strip_url_to_homepage"]
 
 from .recipe_scraper import RecipeScraper
-from ._utils import is_valid_url, domain_extractor, FileHandler
+from ._utils import is_valid_url, domain_extractor, strip_url, FileHandler
 from ._exceptions import (
     ExtractDomainException,
     StripURLToHomepageException,
@@ -24,6 +24,8 @@ def scrape_site(
     except Exception as ex:
         raise Exception(f"{ex}\nPlease adhere to URL format, e.g. https://example.com")
 
+    stripped_url = strip_url(url)
+
     if input_file and input_dict:
         raise InputException(
             "Unable to determine whether to use input_file or input_dict. Please use only 1 input option"
@@ -32,7 +34,19 @@ def scrape_site(
     if input_file and not input_file.endswith(".json"):
         raise InputException("Input file must be of json format, e.g. 'example.json'")
 
-    input_dict = FileHandler(input_file).load_json_file() if input_file else input_dict
+    if input_file:
+        input_dict = FileHandler(input_file).load_json_file()
+
+        all_exclusions_dict = FileHandler(input_file).load_exclusion_json_file()
+
+    exclusions_list = (
+        all_exclusions_dict.get(stripped_url, []) if all_exclusions_dict else []
+    )
+
+    if all_exclusions_dict and len(exclusions_list) == 0:
+        print(
+            "WARNING: URL not found in _recipe_scraper_exclusions.json file. Please ignore this warning if this is the first time scraping the URL"
+        )
 
     if input_dict and not isinstance(input_dict, dict):
         raise InputException(
@@ -48,8 +62,11 @@ def scrape_site(
     if batch_size and not output_file:
         raise Exception("Writing batches requires having an output file to write to")
 
-    recipes_json = RecipeScraper(url, user_agent).scrape_to_json(
-        input_dict=input_dict, output_file=output_file, batch_size=batch_size
+    recipes_json = RecipeScraper(stripped_url, user_agent).scrape_to_json(
+        input_dict=input_dict,
+        exclusions_list=exclusions_list,
+        output_file=output_file,
+        batch_size=batch_size,
     )
 
     if output_file:
@@ -91,6 +108,6 @@ def strip_url_to_homepage(url: str) -> str:
             f"{ex}\nPlease adhere to URL format, e.g. https://example.com"
         )
 
-    stripped_url = strip_url_to_homepage(url)
+    stripped_url = strip_url(url)
 
     return stripped_url
