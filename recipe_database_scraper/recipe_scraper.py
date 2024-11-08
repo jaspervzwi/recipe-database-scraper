@@ -91,13 +91,31 @@ class RecipeScraper:
         - 'Pages without Recipe' key values from input_dict (in case of manual dict input)
         - 'exclusion_list' file content pulled from input_file location
         """
-        if input_dict and len(exclusions_list) == 0:
-            input_location = "input dict"
-            exclusions_list = input_dict.pop("Pages without Recipe", [])
-        else:
-            input_location = "_recipe_scraper_exclusions.json file"
+        input_location = "_recipe_scraper_exclusions.json file"
 
-        if len(exclusions_list) > 0:
+        if input_dict:
+            # Create a copy to avoid modifying the original input_dict
+            input_dict_copy = input_dict.copy()
+
+            input_dict_exclusions = input_dict_copy.pop("Pages without Recipe", [])
+            if not exclusions_list:
+                input_location = "input dict"
+                exclusions_list = input_dict_exclusions
+            elif input_dict_exclusions:
+                print(
+                    """
+                    WARNING: Found pages to exclude in two locations:
+                    - File: '_recipe_scraper_exclusions.json'
+                    - Input file key: 'Pages without Recipe'
+                    Continuing by joining both lists of pages
+                    """
+                )
+                input_location += " & input file"
+                exclusions_list.extend(input_dict_exclusions)
+
+        if exclusions_list:
+            # Drop potential duplicate values
+            exclusions_list = list(set(exclusions_list))
             print(f"Found {len(exclusions_list)} pages to exclude in {input_location}")
 
         return exclusions_list

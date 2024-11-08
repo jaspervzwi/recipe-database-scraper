@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from recipe_scrapers import get_supported_urls
 from recipe_database_scraper.recipe_scraper import Recipe, Recipes, RecipeScraper
+from recipe_database_scraper.sitemap_scraper import Pages
 
 # Mock data for testing
 MOCK_RECIPE_DICT = {
@@ -126,15 +127,75 @@ def test_recipe_scraper_not_supported(mock_recipe_scraper):
     assert result is False
 
 
+mock_input_dict = {
+    "https://example.com/recipe": MOCK_RECIPE_DICT,
+    "Pages without Recipe": [
+        "https://example.com/non-recipe",
+        "https://example.com/non-recipe-2",
+    ],
+}
+
+
 @pytest.mark.recipe
-@patch("recipe_database_scraper.recipe_scraper.is_valid_url", return_value=True)
-def test_handle_input_dict(mock_is_valid_url, mock_recipe_scraper):
+@pytest.mark.parametrize(
+    "exclusions_list, input_dict, expected_output, expected_location",
+    [
+        (
+            [],
+            mock_input_dict,
+            ["https://example.com/non-recipe", "https://example.com/non-recipe-2"],
+            "input dict",
+        ),
+        (
+            ["https://example.com/page1"],
+            {},
+            ["https://example.com/page1"],
+            "_recipe_scraper_exclusions.json file",
+        ),
+        ([], {}, [], "_recipe_scraper_exclusions.json file"),
+        (
+            ["https://example.com/page1"],
+            mock_input_dict,
+            [
+                "https://example.com/page1",
+                "https://example.com/non-recipe",
+                "https://example.com/non-recipe-2",
+            ],
+            "_recipe_scraper_exclusions.json file & input file",
+        ),
+    ],
+)
+def test_handle_exclusions_list(
+    mock_recipe_scraper,
+    exclusions_list,
+    input_dict,
+    expected_output,
+    expected_location,
+    capsys,
+):
+    """Test _handle_exclusions_list for different exclusion sources and outputs."""
+    handled_list = mock_recipe_scraper._handle_exclusions_list(
+        exclusions_list, input_dict
+    )
+
+    assert sorted(handled_list) == sorted(
+        expected_output
+    ), f"Expected {sorted(expected_output)} but got {sorted(handled_list)}"
+
+    captured = capsys.readouterr()
+    if expected_output:
+        assert (
+            f"Found {len(expected_output)} pages to exclude in {expected_location}"
+            in captured.out
+        )
+    else:
+        assert "Found" not in captured.out  # Ensure no print for empty lists
+
+
+@pytest.mark.recipe
+def test_handle_input_dict(mock_recipe_scraper):
     """Test handling of input dict to identify pages without recipes and invalid URLs."""
-    input_dict = {
-        "https://example.com/recipe": MOCK_RECIPE_DICT,
-        "Pages without Recipe": ["https://example.com/non-recipe"],
-    }
-    handled_dict = mock_recipe_scraper._handle_input_dict(input_dict)
+    handled_dict = mock_recipe_scraper._handle_input_dict(mock_input_dict)
     assert "Pages without Recipe" not in handled_dict
     assert handled_dict["https://example.com/recipe"] == MOCK_RECIPE_DICT
 
@@ -184,18 +245,23 @@ def test_scrape_to_json(
     mock_sitemap_scraper, mock_scrape_recipe_page, mock_recipe_scraper
 ):
     """Test the scrape_to_json main flow, ensuring output JSON structure."""
+    pages_obj = Pages()
     mock_page = MagicMock()
     mock_page.page_url = "https://example.com/recipe"
     mock_page.last_modified = "2000-01-01"
     mock_non_recipe_page = "https://example.com/not-a-recipe"
+
+    pages_obj.add_list([mock_page])
+
     mock_sitemap_scraper.return_value.scrape.return_value = (
-        [mock_page],
+        pages_obj,
         [mock_non_recipe_page],
     )
     mock_scrape_recipe_page.return_value = Recipe(
         {"title": "Test Soup Recipe", "ingredients": ["Food", "Water"]}
     )
     json_output = mock_recipe_scraper.scrape_to_json()
+
     assert "https://example.com/recipe" in json_output
     assert "Pages without Recipe" in json_output
     assert "https://example.com/not-a-recipe" in json_output["Pages without Recipe"]
