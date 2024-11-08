@@ -43,6 +43,8 @@ def scrape_site(
         input_dict = FileHandler(input_file).load_json_file()
 
         all_exclusions_dict = FileHandler(input_file).load_exclusion_json_file()
+    else:
+        all_exclusions_dict = None
 
     exclusions_list = (
         all_exclusions_dict.get(stripped_url, []) if all_exclusions_dict else []
