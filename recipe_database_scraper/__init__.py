@@ -1,7 +1,12 @@
 __all__ = ["scrape_site", "extract_domain", "strip_url_to_homepage"]
 
 from .recipe_scraper import RecipeScraper
-from ._utils import is_valid_url, domain_extractor, strip_url, FileHandler
+from ._utils import (
+    is_valid_url,
+    domain_extractor,
+    strip_url_to_homepage as strip_url,
+    FileHandler,
+)
 from ._exceptions import (
     ExtractDomainException,
     StripURLToHomepageException,

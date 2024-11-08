@@ -68,7 +68,7 @@ def domain_extractor(url: str) -> str:
         return full_domain
 
 
-def strip_url(url: str) -> str:
+def strip_url_to_homepage(url: str) -> str:
     """
     Strip URL to its homepage.
 
@@ -98,7 +98,7 @@ def robots_parser(url: str) -> object:
     :return: robot parser object
     """
 
-    stripped_domain_url = strip_url(url)
+    stripped_domain_url = strip_url_to_homepage(url)
     robots_file = stripped_domain_url + "robots.txt"
     try:
         parser = robots.RobotsParser.from_uri(robots_file)
