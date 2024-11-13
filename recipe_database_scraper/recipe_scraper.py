@@ -212,14 +212,15 @@ class RecipeScraper:
         len_filtered_out_urls = len(filtered_out_urls)
         len_sitemap_pages = len_scraped_pages + len_filtered_out_urls
 
-        scraped_pages.drop_url_list(pages_without_recipe)
+        if pages_without_recipe:
+            scraped_pages.drop_url_list(pages_without_recipe)
 
         len_pages_to_scrape = len(scraped_pages)
         len_pages_without_recipe = len(pages_without_recipe)
 
         print(f"Found {str(len_sitemap_pages)} pages in sitemap")
         print(
-            f"Found {str(len_filtered_out_urls)} pages in sitemap that should not contain recipes."
+            f"Found {str(len_filtered_out_urls)} pages in sitemap that should not contain recipes.\n"
             f"Ignoring {str(len_filtered_out_urls + len_pages_without_recipe)} pages. Continuing with remaining {str(len_pages_to_scrape)} pages"
         )
 

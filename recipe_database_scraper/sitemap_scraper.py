@@ -117,9 +117,6 @@ class Pages:
         self.pages.extend(page_list)
 
     def drop_url_list(self, url_list: list):
-        print(
-            f"Removing {str(len(url_list))} pages from {str(len(self.pages))} in self.pages"
-        )
         self.pages = [page for page in self.pages if page.page_url not in url_list]
 
 
@@ -155,9 +152,13 @@ class SitemapScraper:
 
             return all_pages
 
-        # Remove potential duplicate pages
-        pages_dedoubled = set(_get_pages(self.sitemap_tree))
-        pages_list = list(pages_dedoubled)
+        # Remove potential duplicate pages using page URLs in dict method - since set() method may encounter issues with usp's page object __eq__ method
+        page_dict = {
+            page.page_url: page
+            for page in _get_pages(self.sitemap_tree)
+            if hasattr(page, "page_url")
+        }
+        pages_list = list(page_dict.values())
 
         return pages_list
 
