@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "recipe-database-scraper"
-version = "0.1.1"
+version = "0.2.0"
 description = "Python package for building and maintaining a recipe database by scraping a base url"
 authors = ["jaspervzwi <jasperzwieten@gmail.com>"]
 license = "MIT"
