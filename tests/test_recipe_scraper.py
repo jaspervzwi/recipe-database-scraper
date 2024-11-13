@@ -229,7 +229,6 @@ def test_scrape_recipe_page(mock_scrape_html, mock_html_scraper, mock_recipe_scr
 def test_write_batch(mock_file_handler, mock_recipe_scraper):
     """Test that _write_batch writes to file and handles exclusions after reaching batch size."""
     mock_file_handler_instance = mock_file_handler.return_value
-    # mock_file_handler.return_value = MagicMock()
     mock_recipe_scraper.url = "https://example.com"
     mock_recipe_scraper.batch_buffer = 3
     mock_recipe_scraper.recipes = MagicMock()
