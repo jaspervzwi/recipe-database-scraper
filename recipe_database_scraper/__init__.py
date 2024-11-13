@@ -77,7 +77,11 @@ def scrape_site(
     )
 
     if output_file:
+        exclusion_list = recipes_json.pop("Pages without Recipe", [])
         FileHandler(output_file).write_json_file(recipes_json)
+        if exclusion_list:
+            exclusion_dict = {stripped_url: exclusion_list}
+            FileHandler(output_file).write_exclusion_json_file(exclusion_dict)
     else:
         return recipes_json
 

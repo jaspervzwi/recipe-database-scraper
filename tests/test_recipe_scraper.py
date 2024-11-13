@@ -227,14 +227,31 @@ def test_scrape_recipe_page(mock_scrape_html, mock_html_scraper, mock_recipe_scr
 @pytest.mark.recipe
 @patch("recipe_database_scraper.recipe_scraper.FileHandler")
 def test_write_batch(mock_file_handler, mock_recipe_scraper):
-    """Test that _write_batch writes to file after reaching batch size."""
-    mock_file_handler.return_value = MagicMock()
+    """Test that _write_batch writes to file and handles exclusions after reaching batch size."""
+    mock_file_handler_instance = mock_file_handler.return_value
+    # mock_file_handler.return_value = MagicMock()
+    mock_recipe_scraper.url = "https://example.com"
     mock_recipe_scraper.batch_buffer = 3
     mock_recipe_scraper.recipes = MagicMock()
+    mock_recipe_scraper.recipes.to_json.return_value = mock_input_dict
+
     mock_recipe_scraper._write_batch(3, "test_output.json")
+
+    expected_json_output = {"https://example.com/recipe": MOCK_RECIPE_DICT}
     mock_file_handler.return_value.write_json_file.assert_called_once_with(
-        mock_recipe_scraper.recipes.to_json()
+        expected_json_output
     )
+
+    expected_exclusion_dict = {
+        "https://example.com": [
+            "https://example.com/non-recipe",
+            "https://example.com/non-recipe-2",
+        ]
+    }
+    mock_file_handler_instance.write_exclusion_json_file.assert_called_once_with(
+        expected_exclusion_dict
+    )
+
     assert mock_recipe_scraper.batch_buffer == 0
 
 

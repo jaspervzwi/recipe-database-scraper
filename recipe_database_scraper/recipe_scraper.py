@@ -186,7 +186,11 @@ class RecipeScraper:
         self.batch_buffer += 1
         if self.batch_buffer >= batch_size:
             recipes_json = self.recipes.to_json()
+            exclusion_list = recipes_json.pop("Pages without Recipe", [])
             FileHandler(output_file).write_json_file(recipes_json)
+            if exclusion_list:
+                exclusion_dict = {self.url: exclusion_list}
+                FileHandler(output_file).write_exclusion_json_file(exclusion_dict)
             self.batch_buffer = 0
 
     def scrape_to_json(
