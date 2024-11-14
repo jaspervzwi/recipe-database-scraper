@@ -153,11 +153,7 @@ class SitemapScraper:
             return all_pages
 
         # Remove potential duplicate pages using page URLs in dict method - since set() method may encounter issues with usp's page object __eq__ method
-        page_dict = {
-            page.page_url: page
-            for page in _get_pages(self.sitemap_tree)
-            if hasattr(page, "page_url")
-        }
+        page_dict = {page.url.lower(): page for page in _get_pages(self.sitemap_tree)}
         pages_list = list(page_dict.values())
 
         return pages_list
