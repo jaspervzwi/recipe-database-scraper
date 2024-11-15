@@ -29,7 +29,7 @@ user_agent = "Hungry Scraper " + <myname>
 input_file = extract_domain(url) + ".json"
 output_file = extract_domain(url) + "_new.json"
 
-data = scrape_site(url, user_agent, input_file = input_file, output_file = output_file, batch_size = 100)
+scrape_site(url, user_agent, input_file = input_file, output_file = output_file, batch_size = 100)
 ```
 
 ## Output
@@ -52,7 +52,47 @@ If a json file is submitted as the output_file parameter, the scraper returns th
 
 Example output of website with 1 recipe page and 4 pages in total (in case no output_file parameter is submitted):
 ```json
-{"https://example.com/recipes/something_yummy": {"author": "Itsame Mario", "canonical_url":"https://example.com/recipes/something_yummy","category":"yummy", "description": "Yummy food", "host": "example.com", "image": "https://example.com/yummy-default.jpg", "ingredient_groups": [{"ingredients": ["yummyness"], "purpose": null}], "ingredients": ["yummyness"], "instructions": "Cook the food", "instructions_list": ["Step 1", "Prepare", "Step 2", "Cook"], "language": "en-Uk", "nutrients": {}, "prep_time": null, "site_name": "Example", "title": "Yummy Food", "total_time": null, "yields": 1, "last_modified": "2024-12-31T59:59:59+00:00"},"Pages Without Recipe":["https://example.com", "https://example.com/recipes", "https://example.com/blog"]}
+{
+    "https://example.com/recipes/something_yummy": {
+        "author": "Iama Cook", 
+        "canonical_url":"https://example.com/recipes/something_yummy",
+        "category":"yummy", 
+        "description": "Yummy food", 
+        "host": "example.com", 
+        "image": "https://example.com/yummy-default.jpg", 
+        "ingredient_groups": [
+            {
+                "ingredients": [
+                    "yummyness"
+                ], 
+                "purpose": null
+            }
+        ], 
+        "ingredients": [
+            "yummyness"
+        ], 
+        "instructions": "Cook the food", 
+        "instructions_list": [
+            "Step 1", 
+            "Prepare", 
+            "Step 2", 
+            "Cook"
+        ], 
+        "language": "en-Uk", 
+        "nutrients": {}, 
+        "prep_time": null, 
+        "site_name": "Example", 
+        "title": "Yummy Food", 
+        "total_time": null, 
+        "yields": 1, 
+        "last_modified": "2024-12-31T59:59:59+00:00",
+        "Pages Without Recipe": [
+            "https://example.com", 
+            "https://example.com/recipes", 
+            "https://example.com/blog"
+        ]
+    }
+}
 ```
 
 
