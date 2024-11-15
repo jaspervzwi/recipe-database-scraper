@@ -85,13 +85,13 @@ Example output of website with 1 recipe page and 4 pages in total (in case no ou
         "title": "Yummy Food", 
         "total_time": null, 
         "yields": 1, 
-        "last_modified": "2024-12-31T59:59:59+00:00",
-        "Pages Without Recipe": [
-            "https://example.com", 
-            "https://example.com/recipes", 
-            "https://example.com/blog"
-        ]
-    }
+        "last_modified": "2024-12-31T59:59:59+00:00"
+    },
+    "Pages Without Recipe": [
+        "https://example.com", 
+        "https://example.com/recipes", 
+        "https://example.com/blog"
+    ]
 }
 ```
 
