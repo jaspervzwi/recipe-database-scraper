@@ -169,7 +169,11 @@ class RecipeScraper:
         try:
             html = HTMLScraper().scrape_page(page_url, self.user_agent)
             scraper = scrape_html(html, page_url, supported_only=self.website_supported)
-            scraper.title()  # Check if recipe schema is available by pulling standard recipe schema field from recipe_scrapers.scrape_html
+
+            # Check if recipe schema is available by pulling standard recipe schema fields from recipe_scrapers.scrape_html
+            scraper.title()
+            scraper.ingredients()
+
             recipe_json = scraper.to_json()
             recipe_json["last_modified"] = last_modified
             return Recipe(recipe_json)
