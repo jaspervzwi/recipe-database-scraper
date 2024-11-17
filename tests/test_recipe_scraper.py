@@ -195,7 +195,8 @@ def test_handle_exclusions_list(
 @pytest.mark.recipe
 def test_handle_input_dict(mock_recipe_scraper):
     """Test handling of input dict to identify pages without recipes and invalid URLs."""
-    handled_dict = mock_recipe_scraper._handle_input_dict(mock_input_dict)
+    mock_input_dict_copy = mock_input_dict.copy()
+    handled_dict = mock_recipe_scraper._handle_input_dict(mock_input_dict_copy)
     assert "Pages without Recipe" not in handled_dict
     assert handled_dict["https://example.com/recipe"] == MOCK_RECIPE_DICT
 
@@ -232,7 +233,8 @@ def test_write_batch(mock_file_handler, mock_recipe_scraper):
     mock_recipe_scraper.url = "https://example.com"
     mock_recipe_scraper.batch_buffer = 3
     mock_recipe_scraper.recipes = MagicMock()
-    mock_recipe_scraper.recipes.to_json.return_value = mock_input_dict
+    mock_input_dict_copy = mock_input_dict.copy()
+    mock_recipe_scraper.recipes.to_json.return_value = mock_input_dict_copy
 
     mock_recipe_scraper._write_batch(3, "test_output.json")
 
