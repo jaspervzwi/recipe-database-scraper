@@ -2,6 +2,12 @@
 
 <br>
 
+## Installation
+
+```bash
+pip install recipe-database-scraper
+```
+
 ## Usage
 
 ```python
