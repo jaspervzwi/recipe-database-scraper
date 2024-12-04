@@ -57,7 +57,7 @@ def scrape_site(
 
     if input_dict and not isinstance(input_dict, dict):
         raise InputException(
-            f"Provided input_{"file content" if input_file else "dict"} is not a valid dict"
+            f"""Provided input_{"file content" if input_file else "dict"} is not a valid dict"""
         )
 
     if output_file and not output_file.endswith(".json"):
